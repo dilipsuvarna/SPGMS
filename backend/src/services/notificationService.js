@@ -1,6 +1,51 @@
 const transport = require('./notificationTransport');
 const templates = require('./emailTemplates');
 const NotificationLog = require('../models/NotificationLog'); // optional - may exist
+const ComplaintImage = require('../models/ComplaintImage');
+const path = require('path');
+const fs = require('fs');
+
+function complaintId(complaint) {
+  return complaint.complaint_id || complaint.complaintId || complaint._id || '';
+}
+
+async function getAttachments(complaint) {
+  const records = await ComplaintImage.find({ complaint: complaint._id }).lean().exec();
+  const images = [...(complaint.completion_images || []), ...records.map((record) => record.path)];
+  return [...new Set(images)].map((image) => {
+    if (/^https?:\/\//i.test(image)) return { href: image };
+    const filePath = path.isAbsolute(image)
+      ? image
+      : path.join(__dirname, '..', '..', image.replace(/^[/\\]+/, ''));
+    return fs.existsSync(filePath) ? { path: filePath } : null;
+  }).filter(Boolean);
+}
+
+async function sendComplaintEmail(complaint, toEmail, subject, html, templateName) {
+  try {
+    const attachments = await getAttachments(complaint);
+    const res = await transport.sendMail({ to: toEmail, subject, html, attachments });
+    await safeLogNotification({ to: toEmail, subject, templateName, ok: res.ok, error: res.ok ? null : res.error });
+    return { ok: res.ok };
+  } catch (err) {
+    console.error(`[notificationService] ${templateName} email error`, err && err.message);
+    await safeLogNotification({ to: toEmail, subject, templateName, ok: false, error: err && err.message });
+    return { ok: false, error: err && err.message };
+  }
+}
+
+
+function notificationRecipients(complaint, primaryEmail) {
+  return [...new Set([
+    primaryEmail || complaint.email,
+    ...(complaint.affected_contacts || []).map((contact) => contact.email)
+  ].filter(Boolean).map((email) => email.trim().toLowerCase()))];
+}
+
+async function sendComplaintEmailToRecipients(complaint, subject, html, templateName, primaryEmail) {
+  const recipients = notificationRecipients(complaint, primaryEmail);
+  return Promise.all(recipients.map((email) => sendComplaintEmail(complaint, email, subject, html, templateName)));
+}
 
 async function safeLogNotification(payload) {
   try {
@@ -20,7 +65,7 @@ async function safeLogNotification(payload) {
 }
 
 async function sendComplaintRegisteredEmail(complaint, toEmail) {
-  const subject = `SPGMS: Complaint Registered ${complaint.complaintId || ''}`;
+  const subject = `SPGMS: Complaint Registered ${complaintId(complaint)}`;
   const html = templates.registeredTemplate(complaint);
   try {
     const res = await transport.sendMail({ to: toEmail, subject, html });
@@ -35,7 +80,7 @@ async function sendComplaintRegisteredEmail(complaint, toEmail) {
 }
 
 async function sendComplaintAssignedEmail(complaint, toEmail) {
-  const subject = `SPGMS: Complaint Assigned ${complaint.complaintId || ''}`;
+  const subject = `SPGMS: Complaint Assigned ${complaintId(complaint)}`;
   const html = templates.assignedTemplate(complaint);
   try {
     const res = await transport.sendMail({ to: toEmail, subject, html });
@@ -49,7 +94,7 @@ async function sendComplaintAssignedEmail(complaint, toEmail) {
 }
 
 async function sendWorkStartedEmail(complaint, toEmail) {
-  const subject = `SPGMS: Work Started on ${complaint.complaintId || ''}`;
+  const subject = `SPGMS: Work Started on ${complaintId(complaint)}`;
   const html = templates.workStartedTemplate(complaint);
   try {
     const res = await transport.sendMail({ to: toEmail, subject, html });
@@ -63,7 +108,7 @@ async function sendWorkStartedEmail(complaint, toEmail) {
 }
 
 async function sendUnderProgressEmail(complaint, toEmail) {
-  const subject = `SPGMS: Work In Progress - ${complaint.complaintId || ''}`;
+  const subject = `SPGMS: Work In Progress - ${complaintId(complaint)}`;
   const html = templates.underProgressTemplate(complaint);
   try {
     const res = await transport.sendMail({ to: toEmail, subject, html });
@@ -77,7 +122,7 @@ async function sendUnderProgressEmail(complaint, toEmail) {
 }
 
 async function sendResolvedEmail(complaint, toEmail) {
-  const subject = `SPGMS: Complaint Resolved ${complaint.complaintId || ''}`;
+  const subject = `SPGMS: Complaint Resolved ${complaintId(complaint)}`;
   const html = templates.resolvedTemplate(complaint);
   try {
     const res = await transport.sendMail({ to: toEmail, subject, html });
@@ -91,7 +136,7 @@ async function sendResolvedEmail(complaint, toEmail) {
 }
 
 async function sendClosedEmail(complaint, toEmail) {
-  const subject = `SPGMS: Complaint Closed ${complaint.complaintId || ''}`;
+  const subject = `SPGMS: Complaint Closed ${complaintId(complaint)}`;
   const html = templates.closedTemplate(complaint);
   try {
     const res = await transport.sendMail({ to: toEmail, subject, html });
@@ -104,11 +149,35 @@ async function sendClosedEmail(complaint, toEmail) {
   }
 }
 
+async function sendComplaintUpdatedEmail(complaint, toEmail) {
+  const results = await sendComplaintEmailToRecipients(
+    complaint,
+    `SPGMS: Complaint Updated ${complaintId(complaint)}`,
+    templates.updatedTemplate(complaint),
+    'updated',
+    toEmail
+  );
+  return { ok: results.every((result) => result.ok), results };
+}
+
+async function sendComplaintTransferredEmail(complaint, previousComplaintId, previousDepartment, toEmail) {
+  const results = await sendComplaintEmailToRecipients(
+    complaint,
+    `SPGMS: Complaint Transferred ${complaintId(complaint)}`,
+    templates.transferredTemplate(complaint, previousComplaintId, previousDepartment),
+    'transferred',
+    toEmail
+  );
+  return { ok: results.every((result) => result.ok), results };
+}
+
 module.exports = {
   sendComplaintRegisteredEmail,
   sendComplaintAssignedEmail,
   sendWorkStartedEmail,
   sendUnderProgressEmail,
   sendResolvedEmail,
-  sendClosedEmail
+  sendClosedEmail,
+  sendComplaintUpdatedEmail,
+  sendComplaintTransferredEmail
 };

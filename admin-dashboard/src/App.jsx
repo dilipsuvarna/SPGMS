@@ -4,6 +4,7 @@ import DashboardPage from './pages/DashboardPage';
 import ComplaintsPage from './pages/ComplaintsPage';
 import ComplaintDetailPage from './pages/ComplaintDetailPage';
 import OfficersPage from './pages/OfficersPage';
+import OfficerManagePage from './pages/OfficerManagePage';
 
 function ProtectedRoute({ children }) {
   const token = localStorage.getItem('adminToken');
@@ -36,6 +37,7 @@ export default function App() {
         <Route path="/complaints" element={<ProtectedRoute><ComplaintsPage /></ProtectedRoute>} />
         <Route path="/complaints/:complaintId" element={<ProtectedRoute><ComplaintDetailPage /></ProtectedRoute>} />
         <Route path="/officers" element={<ProtectedRoute><OfficersPage /></ProtectedRoute>} />
+        <Route path="/officers/:officerId/manage" element={<ProtectedRoute><OfficerManagePage /></ProtectedRoute>} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </div>

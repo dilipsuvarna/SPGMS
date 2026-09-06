@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { LoadScript, GoogleMap, Marker, Autocomplete } from '@react-google-maps/api';
 import { analyzeComplaint, registerComplaint } from '../services/complaintService';
 
@@ -9,7 +10,16 @@ function buildAddressString(result) {
   return result?.formatted_address || 'Selected location';
 }
 
+function getLatLng(locationData) {
+  if (!locationData) return null;
+  return {
+    lat: typeof locationData.lat === 'function' ? locationData.lat() : locationData.lat,
+    lng: typeof locationData.lng === 'function' ? locationData.lng() : locationData.lng
+  };
+}
+
 export default function RegisterPage() {
+  const navigate = useNavigate();
   const [form, setForm] = useState({ name: '', age: '', mobile: '', email: '', description: '', address: '', declaration: false });
   const [files, setFiles] = useState([]);
   const [previews, setPreviews] = useState([]);
@@ -63,7 +73,7 @@ export default function RegisterPage() {
 
   const onFileChange = (event) => {
     const incoming = Array.from(event.target.files || []);
-    if (incoming.length > 5) {
+    if (files.length + incoming.length > 5) {
       setError('Maximum 5 images allowed.');
       return;
     }
@@ -72,8 +82,9 @@ export default function RegisterPage() {
       setError('Only JPG, JPEG, or PNG images are allowed.');
       return;
     }
-    setFiles(valid);
-    setPreviews(valid.map(file => ({ name: file.name, preview: URL.createObjectURL(file) })));
+    const nextFiles = [...files, ...valid];
+    setFiles(nextFiles);
+    setPreviews(prev => [...prev, ...valid.map(file => ({ name: file.name, preview: URL.createObjectURL(file) }))]);
     setError('');
   };
 
@@ -87,6 +98,10 @@ export default function RegisterPage() {
     event.preventDefault();
     if (!form.name || !form.age || !form.mobile || !form.email || !form.description || !form.declaration) {
       setError('Please fill all required fields and agree to the declaration.');
+      return;
+    }
+    if (!/^\d{10}$/.test(form.mobile)) {
+      setError('Mobile number must contain exactly 10 digits.');
       return;
     }
     if (files.length < 3) {
@@ -108,11 +123,11 @@ export default function RegisterPage() {
       formData.append('address', address || form.address);
       formData.append('latitude', location.lat.toString());
       formData.append('longitude', location.lng.toString());
-      formData.append('place_id', '');
       files.forEach((file) => formData.append('images', file));
       const response = await registerComplaint(formData);
       setResult(response);
       setAnalysis(prev => prev ? { ...prev, department: response.department || prev.department, priority: response.priority || prev.priority } : prev);
+      navigate('/', { state: { registration: response } });
     } catch (err) {
       setError(err.message || 'Submission failed');
     } finally {
@@ -122,6 +137,11 @@ export default function RegisterPage() {
 
   const mapApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
   const mapLibraries = useMemo(() => ['places'], []);
+  const selectLocation = (nextLocation, nextAddress = 'Selected location') => {
+    if (!nextLocation || !Number.isFinite(nextLocation.lat) || !Number.isFinite(nextLocation.lng)) return;
+    setLocation(nextLocation);
+    setAddress(nextAddress);
+  };
 
   return (
     <main className="page">
@@ -134,7 +154,7 @@ export default function RegisterPage() {
             <label>Age<input type="number" min="1" value={form.age} onChange={e => setForm({ ...form, age: e.target.value })} required /></label>
           </div>
           <div className="row">
-            <label>Mobile Number<input value={form.mobile} onChange={e => setForm({ ...form, mobile: e.target.value })} required /></label>
+            <label>Mobile Number<input type="tel" inputMode="numeric" maxLength={10} pattern="[0-9]{10}" value={form.mobile} onChange={e => setForm({ ...form, mobile: e.target.value.replace(/\D/g, '').slice(0, 10) })} required /></label>
             <label>Email Address<input type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} required /></label>
           </div>
 
@@ -157,18 +177,21 @@ export default function RegisterPage() {
               <div className="map-box">
                 <Autocomplete onLoad={(ac) => (autocompleteRef.current = ac)} onPlaceChanged={() => {
                   const place = autocompleteRef.current.getPlace();
-                  const locationData = place.geometry?.location;
-                  if (locationData) {
-                    const lat = locationData.lat();
-                    const lng = locationData.lng();
-                    setLocation({ lat, lng });
-                    setAddress(buildAddressString(place));
-                  }
+                  selectLocation(getLatLng(place.geometry?.location), buildAddressString(place));
                 }}>
                   <input className="search-box" placeholder="Search for a place" />
                 </Autocomplete>
-                <GoogleMap mapContainerStyle={mapContainerStyle} center={location} zoom={13} onClick={(e) => { const lat = e.latLng.lat(); const lng = e.latLng.lng(); setLocation({ lat, lng }); setAddress('Selected location'); }}>
-                  <Marker position={location} draggable onDragEnd={(e) => { const lat = e.latLng.lat(); const lng = e.latLng.lng(); setLocation({ lat, lng }); }} />
+                <GoogleMap mapContainerStyle={mapContainerStyle} center={location} zoom={13} onClick={(e) => {
+                  selectLocation(getLatLng(e.latLng));
+                }}>
+                  <Marker
+                    position={location}
+                    title="Complaint location"
+                    clickable
+                    draggable
+                    onClick={() => setAddress('Selected location')}
+                    onDragEnd={(e) => selectLocation(getLatLng(e.latLng))}
+                  />
                 </GoogleMap>
               </div>
             </LoadScript>

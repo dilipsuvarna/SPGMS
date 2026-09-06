@@ -31,7 +31,7 @@ export default function DashboardPage() {
       if (item.status === 'Registered') counts.registered += 1;
       if (item.status === 'Assigned') counts.assigned += 1;
       if (item.status === 'Work Started') counts.workStarted += 1;
-      if (['Under Progress', 'Work In Progress', 'In Progress'].includes(item.status)) counts.inProgress += 1;
+      if (['Work In Progress', 'In Progress'].includes(item.status)) counts.inProgress += 1;
       if (item.status === 'Resolved') counts.resolved += 1;
       if (item.status === 'Closed') counts.closed += 1;
     });
@@ -59,7 +59,7 @@ export default function DashboardPage() {
       </section>
 
       <section className="card-grid stats-grid">
-        <article className="stat-card"><h3>{summary.total}</h3><p>Total Assigned</p></article>
+        <article className="stat-card"><h3>{summary.total}</h3><p>Total Complaints</p></article>
         <article className="stat-card"><h3>{summary.critical}</h3><p>Critical</p></article>
         <article className="stat-card"><h3>{summary.high}</h3><p>High</p></article>
         <article className="stat-card"><h3>{summary.medium}</h3><p>Medium</p></article>
@@ -84,7 +84,6 @@ export default function DashboardPage() {
             <option value="Registered">Registered</option>
             <option value="Assigned">Assigned</option>
             <option value="Work Started">Work Started</option>
-            <option value="Under Progress">Under Progress</option>
             <option value="Work In Progress">Work In Progress</option>
             <option value="Resolved">Resolved</option>
             <option value="Closed">Closed</option>

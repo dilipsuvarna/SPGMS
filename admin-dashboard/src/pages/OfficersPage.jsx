@@ -27,7 +27,13 @@ export default function OfficersPage() {
                 <strong>{officer.name}</strong>
                 <p className="subtle">{officer.email}</p>
               </div>
-              <div>{officer.department}</div>
+              <div className="officer-management-actions">
+                <div>{officer.department}</div>
+                <Link className="btn secondary manage-button" to={`/officers/${officer._id}/manage`}>
+                  Manage
+                  {(officer.delete_requests || []).length > 0 && <span className="request-count">{officer.delete_requests.length}</span>}
+                </Link>
+              </div>
             </div>
           ))}
         </div>

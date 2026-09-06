@@ -22,7 +22,13 @@ textarea { min-height: 110px; }
 .btn { border: none; border-radius: 999px; padding: 10px 14px; cursor: pointer; background: #e7eef9; color: #14213d; }
 .btn.primary { background: #0f4c81; color: white; }
 .btn.secondary { background: #e7f4ff; color: #0f4c81; }
+.btn.danger { background: #b42318; color: white; }
+.right-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.delete-request-form { margin: 16px 0; padding: 16px; border: 1px solid #f0c4c0; border-radius: 12px; background: #fff8f7; }
 .form-grid { display: flex; flex-direction: column; gap: 12px; }
+.update-form { position: relative; z-index: 1; pointer-events: auto; }
+.update-form select, .update-form input, .update-form textarea { pointer-events: auto; cursor: text; background: white; }
+.update-form select { cursor: pointer; }
 .complaint-card { display: flex; justify-content: space-between; gap: 16px; border: 1px solid #e6edf6; border-radius: 16px; padding: 16px; margin-bottom: 12px; background: #fcfeff; }
 .meta-block { min-width: 220px; }
 .priority-badge { display: inline-flex; padding: 6px 10px; border-radius: 999px; font-weight: 700; }
@@ -33,7 +39,10 @@ textarea { min-height: 110px; }
 .detail-grid { display: grid; gap: 16px; grid-template-columns: 1fr 1fr; margin: 16px 0; }
 .detail-card { background: #fbfdff; border: 1px solid #e6edf6; border-radius: 16px; padding: 16px; }
 .preview-row { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
-.thumb { width: 100%; height: 110px; object-fit: cover; border-radius: 12px; }
+.preview-row { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 16px; }
+.preview-row > * { flex: 0 1 180px; min-width: 0; }
+.thumb { display: block; width: 100%; max-width: 180px; height: 140px; object-fit: cover; border-radius: 12px; cursor: pointer; transition: transform 0.15s ease; }
+.thumb:hover { transform: scale(1.03); }
 .map-iframe { width: 100%; min-height: 240px; border: 0; border-radius: 12px; }
 .timeline-item { border-left: 3px solid #0f4c81; padding-left: 12px; margin-bottom: 12px; }
 .success-box, .error-box { padding: 10px 12px; border-radius: 12px; }

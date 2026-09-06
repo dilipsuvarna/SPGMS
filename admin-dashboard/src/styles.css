@@ -21,6 +21,15 @@ textarea { min-height: 110px; }
 .btn { border: none; border-radius: 999px; padding: 10px 14px; cursor: pointer; background: #e7eef9; color: #14213d; }
 .btn.primary { background: #0f4c81; color: white; }
 .btn.secondary { background: #e7f4ff; color: #0f4c81; }
+.btn.danger { background: #b42318; color: white; }
+.right-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.officer-management-actions { display: flex; align-items: center; gap: 16px; }
+.manage-button { position: relative; }
+.request-count { position: absolute; top: -8px; right: -8px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 999px; background: #b42318; color: white; font-size: 12px; font-weight: 700; line-height: 20px; text-align: center; }
+.delete-requests { margin: -8px 0 12px; padding: 14px; border: 1px solid #f0c4c0; border-radius: 12px; background: #fff8f7; }
+.delete-request-card { padding: 12px 0; border-top: 1px solid #f0c4c0; }
+.delete-request-card:first-of-type { border-top: 0; }
+.delete-request-card p { margin: 0 0 8px; }
 .form-grid { display: flex; flex-direction: column; gap: 12px; }
 .complaint-card { display: flex; justify-content: space-between; gap: 16px; border: 1px solid #e6edf6; border-radius: 16px; padding: 16px; margin-bottom: 12px; background: #fcfeff; }
 .meta-block { min-width: 220px; }
@@ -28,7 +37,12 @@ textarea { min-height: 110px; }
 .pill-row { background: #f8fbff; border: 1px solid #e0ebf7; border-radius: 12px; padding: 12px 14px; }
 .detail-grid { display: grid; gap: 16px; grid-template-columns: 1fr 1fr; margin: 16px 0; }
 .detail-card { background: #fbfdff; border: 1px solid #e6edf6; border-radius: 16px; padding: 16px; }
+.preview-row { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 16px; }
+.preview-row > * { flex: 0 1 180px; min-width: 0; }
+.thumb { display: block; width: 100%; max-width: 180px; height: 140px; object-fit: cover; border-radius: 12px; cursor: pointer; transition: transform 0.15s ease; }
+.thumb:hover { transform: scale(1.03); }
 .map-iframe { width: 100%; min-height: 240px; border: 0; border-radius: 12px; }
+.timeline-item { border-left: 3px solid #0f4c81; padding-left: 12px; margin-bottom: 12px; }
 .success-box, .error-box { padding: 10px 12px; border-radius: 12px; }
 .success-box { background: #ecfdf3; color: #166534; }
 .error-box { background: #fef2f2; color: #b91c1c; }

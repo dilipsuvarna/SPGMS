@@ -42,10 +42,23 @@ function baseTemplate({ title, bodyHtml, footerHtml }) {
 }
 
 function complaintFieldsHtml(complaint) {
-  const expected = complaint.expectedResolution || 'N/A';
-  const remarks = complaint.officerRemarks || 'N/A';
+  const expectedValue = complaint.expected_resolution_date || complaint.expectedResolution;
+  let expected = 'N/A';
+  if (expectedValue) {
+    const date = new Date(expectedValue);
+    if (Number.isNaN(date.getTime())) {
+      expected = expectedValue;
+    } else {
+      const hours = date.getHours();
+      const meridiem = hours >= 12 ? 'pm' : 'am';
+      const hour = hours % 12 || 12;
+      const pad = (part) => String(part).padStart(2, '0');
+      expected = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}, ${hour}:${pad(date.getMinutes())}:${pad(date.getSeconds())} ${meridiem}`;
+    }
+  }
+  const remarks = complaint.officer_remarks || complaint.officerRemarks || 'N/A';
   return `
-    <div class="field"><label>Complaint ID</label><div class="value">${complaint.complaintId || complaint._id}</div></div>
+    <div class="field"><label>Complaint ID</label><div class="value">${complaint.complaint_id || complaint.complaintId || complaint._id}</div></div>
     <div class="field"><label>Citizen</label><div class="value">${complaint.name || 'N/A'}</div></div>
     <div class="field"><label>Department</label><div class="value">${complaint.department || 'N/A'}</div></div>
     <div class="field"><label>Priority</label><div class="value">${complaint.priority || 'N/A'}</div></div>
@@ -120,11 +133,34 @@ function closedTemplate(complaint) {
   return baseTemplate({ title: 'Complaint Closed - SPGMS', bodyHtml: body, footerHtml: footerHtml() });
 }
 
+function updatedTemplate(complaint) {
+  const body = `
+    <p>Dear ${complaint.name || 'Citizen'},</p>
+    <p>Your complaint details have been updated by the assigned officer:</p>
+    ${complaintFieldsHtml(complaint)}
+  `;
+  return baseTemplate({ title: 'Complaint Updated - SPGMS', bodyHtml: body, footerHtml: footerHtml() });
+}
+
+function transferredTemplate(complaint, previousComplaintId, previousDepartment) {
+  const body = `
+    <p>Dear ${complaint.name || 'Citizen'},</p>
+    <p>Your complaint has been transferred to a different department by the administrator.</p>
+    <div class="field"><label>Previous Complaint ID</label><div class="value">${previousComplaintId}</div></div>
+    <div class="field"><label>Previous Department</label><div class="value">${previousDepartment}</div></div>
+    ${complaintFieldsHtml(complaint)}
+    <p>Please use the new complaint ID for future tracking.</p>
+  `;
+  return baseTemplate({ title: 'Complaint Transferred - SPGMS', bodyHtml: body, footerHtml: footerHtml() });
+}
+
 module.exports = {
   registeredTemplate,
   assignedTemplate,
   workStartedTemplate,
   underProgressTemplate,
   resolvedTemplate,
-  closedTemplate
+  closedTemplate,
+  updatedTemplate,
+  transferredTemplate
 };

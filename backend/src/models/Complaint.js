@@ -10,12 +10,31 @@ const ComplaintSchema = new mongoose.Schema({
   department: String,
   priority: String,
   address: String,
-  place_id: String,
   latitude: Number,
   longitude: Number,
+  location: {
+    address: String,
+    latitude: Number,
+    longitude: Number
+  },
   status: String,
   assigned_officer_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Officer' },
+  assignedOfficerName: String,
+  transfer_history: [{
+    previous_complaint_id: String,
+    previous_department: String,
+    new_complaint_id: String,
+    new_department: String,
+    transferred_at: Date,
+    transferred_by: String,
+    assigned_officer_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Officer' }
+  }],
   affected_citizens: { type: Number, default: 1 },
+  affected_contacts: [{
+    name: String,
+    email: String,
+    mobile: String
+  }],
   expected_resolution_date: String,
   officer_remarks: String,
   completion_images: [{ type: String }],

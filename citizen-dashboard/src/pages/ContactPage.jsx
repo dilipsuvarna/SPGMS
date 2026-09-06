@@ -3,8 +3,8 @@ export default function ContactPage() {
     <main className="page">
       <section className="card">
         <h2>Contact</h2>
-        <p>Email: support@spgms.local</p>
-        <p>Phone: +91-9876543210</p>
+        <p>Email: spgmsproject4@gmail.com</p>
+        <p>Phone: 8147661141</p>
       </section>
     </main>
   );
