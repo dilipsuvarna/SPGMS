@@ -175,7 +175,6 @@ export default function ComplaintDetailPage() {
               <option value="Low">Low</option>
             </select></label>
             <label>Status<select value={status} onChange={(e) => setStatus(e.target.value)}>
-              <option value="Registered">Registered</option>
               <option value="Assigned">Assigned</option>
               <option value="Work Started">Work Started</option>
               <option value="Work In Progress">Work In Progress</option>

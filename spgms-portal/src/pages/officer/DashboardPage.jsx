@@ -81,7 +81,6 @@ export default function DashboardPage() {
           </select>
           <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
             <option value="All">All statuses</option>
-            <option value="Registered">Registered</option>
             <option value="Assigned">Assigned</option>
             <option value="Work Started">Work Started</option>
             <option value="Work In Progress">Work In Progress</option>

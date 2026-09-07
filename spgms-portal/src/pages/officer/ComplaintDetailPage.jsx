@@ -206,7 +206,6 @@ export default function ComplaintDetailPage() {
           <form onSubmit={onSubmit} className="form-grid update-form">
             <label htmlFor="complaint-status">Status</label>
             <select id="complaint-status" value={status} onChange={(e) => setStatus(e.target.value)}>
-              <option value="Registered">Registered</option>
               <option value="Assigned">Assigned</option>
               <option value="Work Started">Work Started</option>
               <option value="Work In Progress">Work In Progress</option>

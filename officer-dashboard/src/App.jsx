@@ -17,7 +17,6 @@ function NavBar() {
       <Link to="/dashboard" className="brand">SPGMS Officer Portal</Link>
       <div className="nav-links">
         {officer ? <span className="nav-user">{officer.name}</span> : null}
-        {location.pathname !== '/login' ? <Link to="/dashboard">Dashboard</Link> : null}
       </div>
     </nav>
   );

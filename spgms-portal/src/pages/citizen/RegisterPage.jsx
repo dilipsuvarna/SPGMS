@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GoogleMap, LoadScript, MarkerF } from '@react-google-maps/api';
 import { analyzeComplaint, registerComplaint } from '../../services/complaintService';
@@ -21,90 +21,16 @@ export default function RegisterPage() {
   const [previews, setPreviews] = useState([]);
   const [location, setLocation] = useState(defaultCenter);
   const [address, setAddress] = useState('');
-  const [status, setStatus] = useState('Ready');
-  const [isListening, setIsListening] = useState(false);
   const [analysis, setAnalysis] = useState(null);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const recognitionRef = useRef(null);
   const mapRef = useRef(null);
   const selectLocation = (nextLocation) => {
     if (!nextLocation || !Number.isFinite(nextLocation.lat) || !Number.isFinite(nextLocation.lng)) return;
     setLocation(nextLocation);
     setAddress('Selected location');
     mapRef.current?.panTo(nextLocation);
-  };
-
-  useEffect(() => {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      setStatus('Voice input is not supported in this browser.');
-      return;
-    }
-
-    const recognition = new SpeechRecognition();
-    recognition.lang = 'en-US';
-    recognition.continuous = false;
-    recognition.interimResults = false;
-
-    recognition.onstart = () => {
-      setIsListening(true);
-      setStatus('Listening');
-    };
-
-    recognition.onresult = (event) => {
-      const transcript = Array.from(event.results)
-        .map(result => result[0]?.transcript || '')
-        .join(' ')
-        .trim();
-
-      if (!transcript) return;
-
-      setForm(prev => ({
-        ...prev,
-        description: prev.description ? `${prev.description.trim()} ${transcript}`.trim() : transcript
-      }));
-      setStatus('Voice added to description');
-    };
-
-    recognition.onerror = (event) => {
-      console.error('Speech recognition error:', event.error);
-      setStatus(event.error === 'no-speech' ? 'No speech detected' : 'Voice input error');
-      setIsListening(false);
-    };
-
-    recognition.onend = () => {
-      setIsListening(false);
-      setStatus('Ready');
-    };
-
-    recognitionRef.current = recognition;
-  }, []);
-
-  const startVoice = () => {
-    if (!recognitionRef.current) {
-      setError('Speech recognition is not available in this browser.');
-      return;
-    }
-
-    try {
-      recognitionRef.current.start();
-      setIsListening(true);
-      setStatus('Listening');
-      setError('');
-    } catch (err) {
-      if (err.name !== 'InvalidStateError') {
-        console.error('Speech recognition start failed:', err);
-      }
-      setStatus('Listening');
-    }
-  };
-
-  const stopVoice = () => {
-    if (recognitionRef.current) recognitionRef.current.stop();
-    setIsListening(false);
-    setStatus('Ready');
   };
 
   const onFileChange = (event) => {
@@ -188,11 +114,6 @@ export default function RegisterPage() {
 
           <label>Complaint Description *</label>
           <textarea rows="7" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="Describe the issue in detail" required />
-          <div className="voice-toolbar">
-            <button type="button" className="btn secondary" onClick={startVoice}>🎤 Start Voice Input</button>
-            <button type="button" className="btn" onClick={stopVoice}>Stop Voice Input</button>
-            <span className={`pill ${isListening ? 'listening' : ''}`}>Status: {status}</span>
-          </div>
 
           <label>Upload images (minimum 3, maximum 5)</label>
           <input type="file" multiple accept="image/png,image/jpeg,image/jpg" onChange={onFileChange} />
