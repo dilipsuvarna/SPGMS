@@ -18,7 +18,7 @@ export default function DashboardPage() {
           <h1>SPGMS Overview</h1>
           <p className="subtle">Monitor complaints, AI decisions, and officer workload.</p>
         </div>
-        <button className="btn" onClick={() => { logoutAdmin(); navigate('/admin/login'); }}>Logout</button>
+        <button className="btn" onClick={() => { logoutAdmin(); navigate('/'); }}>Logout</button>
       </section>
       {!data ? <section className="card">Loading...</section> : (
         <>

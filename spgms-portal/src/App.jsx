@@ -28,7 +28,7 @@ function PublicNav() {
   return <nav className="top-nav public-nav">
     <Link to="/citizen" className="brand">
       <span className="brand-mark" aria-hidden="true"><span className="brand-building" /><span className="brand-leaf" /></span>
-      <span><strong>SPGMS</strong><small>SMART PUBLIC GRIEVANCE<br />MANAGEMENT SYSTEM</small></span>
+      <span><strong>SPGMS</strong></span>
     </Link>
     <div className="nav-links">{links.map(([to, label]) => <Link key={to} className={location.pathname === to ? 'active' : ''} to={to}>{label}</Link>)}</div>
   </nav>;

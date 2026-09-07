@@ -37,6 +37,13 @@ async function assignPendingComplaints() {
     c.assignedOfficerName = officer.name || (officer.department + ' Officer');
     c.status = 'Assigned';
     c.updated_at = new Date();
+    c.timeline = c.timeline || [];
+    c.timeline.push({
+      status: 'Assigned',
+      timestamp: new Date(),
+      remarks: `Complaint assigned to ${c.assignedOfficerName} (${officer.department}).`,
+      by: 'system'
+    });
     await c.save();
 
     // notify the citizen via email

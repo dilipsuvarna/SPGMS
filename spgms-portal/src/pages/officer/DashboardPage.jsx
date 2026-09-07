@@ -54,7 +54,7 @@ export default function DashboardPage() {
           <p className="subtle">Review complaints assigned to your department and update progress.</p>
         </div>
         <div className="right-actions">
-          <button className="btn" onClick={() => { logoutOfficer(); navigate('/officer/login'); }}>Logout</button>
+          <button className="btn" onClick={() => { logoutOfficer(); navigate('/'); }}>Logout</button>
         </div>
       </section>
 
