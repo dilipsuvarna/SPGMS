@@ -40,7 +40,7 @@ function RoleNav() {
     return <nav className="top-nav"><Link to="/admin/dashboard" className="brand">SPGMS Admin Portal</Link><div className="nav-links"><Link to="/admin/dashboard">Dashboard</Link><Link to="/admin/complaints">Complaints</Link><Link to="/admin/officers">Officers</Link></div></nav>;
   }
   if (location.pathname.startsWith('/officer') && location.pathname !== '/officer/login') {
-    return <nav className="top-nav"><Link to="/officer/dashboard" className="brand">SPGMS Officer Portal</Link><div className="nav-links"><Link to="/officer/dashboard">Dashboard</Link></div></nav>;
+    return <nav className="top-nav"><Link to="/officer/dashboard" className="brand">SPGMS Officer Portal</Link></nav>;
   }
   return null;
 }
