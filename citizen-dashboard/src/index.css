@@ -31,6 +31,7 @@ textarea { min-height: 120px; }
 .preview-card button { margin-top: 8px; width: 100%; }
 .map-box { border-radius: 16px; overflow: hidden; border: 1px solid #e4ebf4; }
 .search-box { width: 100%; border: 0; border-bottom: 1px solid #e4ebf4; border-radius: 0; }
+.location-button { margin: 8px 0; }
 .checkbox-row { flex-direction: row; align-items: center; gap: 8px; }
 .analysis-box, .success-box, .error-box { padding: 12px 14px; border-radius: 12px; }
 .analysis-box { background: #f2f8ff; }

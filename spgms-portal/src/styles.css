@@ -46,7 +46,8 @@ textarea { min-height: 110px; }
 .preview-row > * { flex: 0 1 180px; min-width: 0; }
 .thumb { display: block; width: 100%; max-width: 180px; height: 140px; object-fit: cover; border-radius: 12px; cursor: pointer; transition: transform 0.15s ease; }
 .thumb:hover { transform: scale(1.03); }
-.map-iframe { width: 100%; min-height: 240px; border: 0; border-radius: 12px; }
+.map-link { display: inline-flex; margin-bottom: 12px; }
+.map-iframe { display: block; width: 100%; min-height: 240px; border: 0; border-radius: 12px; }
 .location-map { overflow: hidden; padding: 0; min-height: 320px; }
 .map-fallback { min-height: 320px; display: grid; place-items: center; padding: 24px; }
 .timeline-item { border-left: 3px solid #0f4c81; padding-left: 12px; margin-bottom: 12px; }
@@ -342,6 +343,7 @@ textarea { min-height: 120px; }
 .preview-card button { margin-top: 8px; width: 100%; }
 .map-box { border-radius: 16px; overflow: hidden; border: 1px solid #e4ebf4; }
 .search-box { width: 100%; border: 0; border-bottom: 1px solid #e4ebf4; border-radius: 0; }
+.location-button { margin: 8px 0; }
 .checkbox-row {
   display: flex !important;
   flex-direction: row !important;

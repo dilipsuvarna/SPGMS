@@ -2,6 +2,12 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { getAssignedComplaints, getStoredOfficer, logoutOfficer } from '../services/officerService';
 
+function getMapUrl(item) {
+  const location = item.location || item;
+  if (location.latitude == null || location.longitude == null) return '';
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${location.latitude},${location.longitude}`)}`;
+}
+
 const priorityOrder = ['Critical', 'High', 'Medium', 'Low'];
 
 export default function DashboardPage() {
@@ -105,7 +111,10 @@ export default function DashboardPage() {
                 <p><strong>Location:</strong> {item.address || 'Location provided'}</p>
                 <p><strong>Affected Citizens:</strong> {item.affected_citizens || 1}</p>
                 <p><strong>Registered:</strong> {new Date(item.created_at).toLocaleString()}</p>
-                <Link className="btn secondary" to={`/complaints/${item.complaint_id}`}>Open</Link>
+                <div className="right-actions">
+                  <Link className="btn secondary" to={`/complaints/${item.complaint_id}`}>Open</Link>
+                  {getMapUrl(item) && <a className="btn secondary" href={getMapUrl(item)} target="_blank" rel="noreferrer">Track Location</a>}
+                </div>
               </div>
             </article>
           ))}

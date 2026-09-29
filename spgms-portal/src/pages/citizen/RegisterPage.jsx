@@ -33,6 +33,26 @@ export default function RegisterPage() {
     mapRef.current?.panTo(nextLocation);
   };
 
+  const selectLocationWithAddress = (nextLocation, nextAddress) => {
+    if (!nextLocation || !Number.isFinite(nextLocation.lat) || !Number.isFinite(nextLocation.lng)) return;
+    setLocation(nextLocation);
+    setAddress(nextAddress);
+    mapRef.current?.panTo(nextLocation);
+  };
+
+  const useCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      setError('Your browser does not support location access.');
+      return;
+    }
+    setError('');
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => selectLocationWithAddress({ lat: coords.latitude, lng: coords.longitude }, 'Current location'),
+      () => setError('Unable to access your current location. Please allow location access or choose a location on the map.'),
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
+
   const onFileChange = (event) => {
     const incoming = Array.from(event.target.files || []);
     if (files.length + incoming.length > 5) {
@@ -124,11 +144,12 @@ export default function RegisterPage() {
           {import.meta.env.VITE_GOOGLE_MAPS_API_KEY ? (
             <LoadScript googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}>
               <div className="map-box">
+                <button className="btn secondary location-button" type="button" onClick={useCurrentLocation}>Use my current location</button>
                 <GoogleMap
                   mapContainerStyle={mapContainerStyle}
                   center={location}
                   zoom={13}
-                  onLoad={(map) => { mapRef.current = map; }}
+                  onLoad={(map) => { mapRef.current = map; useCurrentLocation(); }}
                   onUnmount={() => { mapRef.current = null; }}
                   onClick={(event) => selectLocation(getLatLng(event.latLng))}
                 >

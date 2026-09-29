@@ -1,14 +1,10 @@
-import { useMemo, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LoadScript, GoogleMap, Marker, Autocomplete } from '@react-google-maps/api';
+import { LoadScript, GoogleMap, Marker } from '@react-google-maps/api';
 import { analyzeComplaint, registerComplaint } from '../services/complaintService';
 
 const mapContainerStyle = { width: '100%', height: '320px', borderRadius: '12px' };
 const defaultCenter = { lat: 12.9716, lng: 77.5946 };
-
-function buildAddressString(result) {
-  return result?.formatted_address || 'Selected location';
-}
 
 function getLatLng(locationData) {
   if (!locationData) return null;
@@ -29,7 +25,18 @@ export default function RegisterPage() {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const autocompleteRef = useRef(null);
+  const useCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      setError('Your browser does not support location access.');
+      return;
+    }
+    setError('');
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => selectLocation({ lat: coords.latitude, lng: coords.longitude }, 'Current location'),
+      () => setError('Unable to access your current location. Please allow location access or choose a location on the map.'),
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
 
   const onFileChange = (event) => {
     const incoming = Array.from(event.target.files || []);
@@ -96,7 +103,6 @@ export default function RegisterPage() {
   };
 
   const mapApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
-  const mapLibraries = useMemo(() => ['places'], []);
   const selectLocation = (nextLocation, nextAddress = 'Selected location') => {
     if (!nextLocation || !Number.isFinite(nextLocation.lat) || !Number.isFinite(nextLocation.lng)) return;
     setLocation(nextLocation);
@@ -128,17 +134,16 @@ export default function RegisterPage() {
           <label>Issue Location</label>
           <p className="subtle">Mark the exact location where the issue is occurring.</p>
           {mapApiKey ? (
-            <LoadScript googleMapsApiKey={mapApiKey} libraries={mapLibraries}>
+            <LoadScript googleMapsApiKey={mapApiKey}>
               <div className="map-box">
-                <Autocomplete onLoad={(ac) => (autocompleteRef.current = ac)} onPlaceChanged={() => {
-                  const place = autocompleteRef.current.getPlace();
-                  selectLocation(getLatLng(place.geometry?.location), buildAddressString(place));
-                }}>
-                  <input className="search-box" placeholder="Search for a place" />
-                </Autocomplete>
-                <GoogleMap mapContainerStyle={mapContainerStyle} center={location} zoom={13} onClick={(e) => {
-                  selectLocation(getLatLng(e.latLng));
-                }}>
+                <button className="btn secondary location-button" type="button" onClick={useCurrentLocation}>Use my current location</button>
+                <GoogleMap
+                  mapContainerStyle={mapContainerStyle}
+                  center={location}
+                  zoom={13}
+                  onLoad={useCurrentLocation}
+                  onClick={(e) => selectLocation(getLatLng(e.latLng))}
+                >
                   <Marker
                     position={location}
                     title="Complaint location"

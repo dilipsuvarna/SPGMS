@@ -2,6 +2,12 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { deleteComplaint, getComplaints } from '../../services/adminService';
 
+function getMapUrl(item) {
+  const location = item.location || item;
+  if (location.latitude == null || location.longitude == null) return '';
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${location.latitude},${location.longitude}`)}`;
+}
+
 export default function ComplaintsPage() {
   const [complaints, setComplaints] = useState([]);
   const [search, setSearch] = useState('');
@@ -55,6 +61,7 @@ export default function ComplaintsPage() {
                 <p><strong>Location:</strong> {item.address || 'N/A'}</p>
                 <div className="right-actions">
                   <Link className="btn secondary" to={`/admin/complaints/${item.complaint_id}`}>Review</Link>
+                  {getMapUrl(item) && <a className="btn secondary" href={getMapUrl(item)} target="_blank" rel="noreferrer">Track Location</a>}
                   <button className="btn danger" type="button" onClick={() => onDelete(item)} disabled={deletingId === item.complaint_id}>
                     {deletingId === item.complaint_id ? 'Deleting...' : 'Delete'}
                   </button>
@@ -67,6 +74,5 @@ export default function ComplaintsPage() {
     </main>
   );
 }
-
 
 

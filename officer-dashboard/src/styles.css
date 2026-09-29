@@ -51,7 +51,8 @@ textarea { min-height: 110px; }
 .preview-row > * { flex: 0 1 180px; min-width: 0; }
 .thumb { display: block; width: 100%; max-width: 180px; height: 140px; object-fit: cover; border-radius: 12px; cursor: pointer; transition: transform 0.15s ease; }
 .thumb:hover { transform: scale(1.03); }
-.map-iframe { width: 100%; min-height: 240px; border: 0; border-radius: 12px; }
+.map-link { display: inline-flex; margin-bottom: 12px; }
+.map-iframe { display: block; width: 100%; min-height: 240px; border: 0; border-radius: 12px; }
 .timeline-item { border-left: 3px solid #0f4c81; padding-left: 12px; margin-bottom: 12px; }
 .success-box, .error-box { padding: 10px 12px; border-radius: 12px; }
 .success-box { background: #ecfdf3; color: #166534; }

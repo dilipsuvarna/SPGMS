@@ -120,7 +120,7 @@ export default function ComplaintDetailPage() {
             <h3>Location</h3>
             <p>{complaint.location?.address || complaint.address || 'Address not provided'}</p>
             <p><strong>Coordinates:</strong> {complaint.location?.latitude ?? complaint.latitude}, {complaint.location?.longitude ?? complaint.longitude}</p>
-            {mapSrc ? <iframe title="Location" src={mapSrc} className="map-iframe" /> : <p>No coordinates available.</p>}
+            {mapSrc ? <><a className="btn secondary map-link" href={mapSrc.replace('&output=embed', '')} target="_blank" rel="noreferrer">Track Location in Maps</a><iframe title="Location" src={mapSrc} className="map-iframe" /></> : <p>No coordinates available.</p>}
           </div>
         </div>
 
@@ -192,6 +192,4 @@ export default function ComplaintDetailPage() {
     </main>
   );
 }
-
-
 
