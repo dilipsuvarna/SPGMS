@@ -5,3 +5,8 @@
 # Keep example templates in the repository.
 !**/.env.example
 !**/.env.*.example
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
