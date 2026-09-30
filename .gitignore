@@ -1,0 +1,7 @@
+# Environment files may contain secrets.
+**/.env
+**/.env.*
+
+# Keep example templates in the repository.
+!**/.env.example
+!**/.env.*.example
