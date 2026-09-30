@@ -1,0 +1,72 @@
+import { API_BASE_URL } from '../apiConfig.js';
+
+const API_BASE = `${API_BASE_URL}/api/admin`;
+
+async function request(path, options = {}) {
+  const headers = options.headers || {};
+  const token = localStorage.getItem('adminToken');
+  const response = await fetch(`${API_BASE_URL}/api${path}`, {
+    ...options,
+    headers: { ...headers, ...(token ? { Authorization: `Bearer ${token}` } : {}) }
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const message = data.error === 'complaint_deleted_by_authority'
+      ? 'This complaint was deleted by the authority.'
+      : data.error || 'Request failed';
+    throw new Error(message);
+  }
+  return data;
+}
+
+export async function loginAdmin(username, password) {
+  const data = await fetch(`${API_BASE}/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password })
+  }).then(async (response) => {
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(payload.error || 'Login failed');
+    return payload;
+  });
+  localStorage.setItem('adminToken', data.token);
+  return data;
+}
+
+export async function getDashboard() {
+  return request('/admin/dashboard');
+}
+
+export async function getComplaints() {
+  return request('/admin/complaints');
+}
+
+export async function getOfficers() {
+  return request('/admin/officers');
+}
+
+export async function overrideComplaint(complaintId, payload) {
+  return request(`/admin/complaints/${encodeURIComponent(complaintId)}/override`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+}
+
+export async function deleteComplaint(complaintId) {
+  return request(`/admin/complaints/${encodeURIComponent(complaintId)}`, {
+    method: 'DELETE'
+  });
+}
+
+export async function reviewDeleteRequest(requestId, action) {
+  return request(`/admin/delete-requests/${encodeURIComponent(requestId)}/review`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action })
+  });
+}
+
+export function logoutAdmin() {
+  localStorage.removeItem('adminToken');
+}

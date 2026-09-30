@@ -1,6 +1,34 @@
 const { classifyComplaint, detectPriority } = require('../utils/classifier');
 
-const AI_BASE_URL = process.env.AI_SERVICE_URL || 'http://127.0.0.1:8000';
+const AI_SERVICE_URL = (process.env.AI_SERVICE_URL || 'https://ai-module-dmh1.onrender.com').replace(/\/+$/, '');
+const AI_REQUEST_TIMEOUT_MS = 10000;
+
+function parseAnalysis(data) {
+  if (
+    !data ||
+    typeof data !== 'object' ||
+    typeof data.department !== 'string' ||
+    typeof data.departmentConfidence !== 'number' ||
+    typeof data.priority !== 'string' ||
+    typeof data.priorityConfidence !== 'number' ||
+    !Array.isArray(data.keywords) ||
+    !data.keywords.every((keyword) => typeof keyword === 'string') ||
+    !Array.isArray(data.emergencyIndicators) ||
+    !data.emergencyIndicators.every((indicator) => typeof indicator === 'string')
+  ) {
+    throw new Error('AI service returned an invalid analysis response');
+  }
+
+  return {
+    department: data.department,
+    departmentConfidence: data.departmentConfidence,
+    priority: data.priority,
+    priorityConfidence: data.priorityConfidence,
+    keywords: data.keywords,
+    emergencyIndicators: data.emergencyIndicators,
+    source: 'python'
+  };
+}
 
 async function analyzeText(text) {
   if (!text || !String(text).trim()) {
@@ -16,25 +44,20 @@ async function analyzeText(text) {
   }
 
   try {
-    const response = await fetch(`${AI_BASE_URL}/analyze`, {
+    const response = await fetch(`${AI_SERVICE_URL}/analyze`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text })
+      body: JSON.stringify({ text }),
+      signal: AbortSignal.timeout(AI_REQUEST_TIMEOUT_MS)
     });
 
-    if (!response.ok) throw new Error(`AI service error: ${response.status}`);
-    const data = await response.json();
-    return {
-      department: data.department || classifyComplaint(text),
-      departmentConfidence: data.departmentConfidence || 0.7,
-      priority: data.priority || detectPriority(text),
-      priorityConfidence: data.priorityConfidence || 0.7,
-      keywords: data.keywords || [],
-      emergencyIndicators: data.emergencyIndicators || [],
-      source: 'python'
-    };
+    if (!response.ok) {
+      throw new Error(`AI service returned HTTP ${response.status}`);
+    }
+
+    return parseAnalysis(await response.json());
   } catch (err) {
-    console.warn('[aiService] falling back to local heuristic', err && err.message);
+    console.warn('[aiService] AI request failed; using local heuristic', err && err.message);
     return {
       department: classifyComplaint(text),
       departmentConfidence: 0.65,
