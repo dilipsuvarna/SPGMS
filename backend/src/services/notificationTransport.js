@@ -1,57 +1,45 @@
 const nodemailer = require('nodemailer');
 
 const EMAIL_USER = process.env.EMAIL_USER;
-const EMAIL_PASS = process.env.EMAIL_PASS;
+const BREVO_SMTP_LOGIN = process.env.BREVO_SMTP_LOGIN;
+const BREVO_SMTP_KEY = process.env.BREVO_SMTP_KEY;
 
 let transporter = null;
 
 function createTransporter() {
   if (transporter) return transporter;
-  if (!EMAIL_USER || !EMAIL_PASS) {
-    console.warn('[notificationTransport] EMAIL_USER or EMAIL_PASS not configured; transport will be a no-op logger.');
-    transporter = {
-      async sendMail(opts) {
-        console.log('[notificationTransport] (dev) sendMail called with', opts);
-        return { accepted: [opts.to], messageId: 'dev-local' };
-      }
-    };
-    return transporter;
+  if (!EMAIL_USER || !BREVO_SMTP_LOGIN || !BREVO_SMTP_KEY) {
+    throw new Error('EMAIL_USER, BREVO_SMTP_LOGIN, and BREVO_SMTP_KEY must be configured to send email');
   }
 
   transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp-relay.brevo.com',
+    port: 587,
+    secure: false,
     auth: {
-      user: EMAIL_USER,
-      pass: EMAIL_PASS
+      user: BREVO_SMTP_LOGIN,
+      pass: BREVO_SMTP_KEY
     }
-  });
-
-  // Verify transporter in background
-  transporter.verify().then(() => {
-    console.log('[notificationTransport] Nodemailer transporter verified');
-  }).catch((err) => {
-    console.error('[notificationTransport] transporter verify failed', err && err.message);
   });
 
   return transporter;
 }
 
-async function sendMail({ to, subject, text, html, from }) {
+async function sendMail({ to, subject, text, html, from, attachments }) {
   try {
-    const t = createTransporter();
-    const mailOptions = {
-      from: from || process.env.EMAIL_USER || 'no-reply@spgms.local',
+    const result = await createTransporter().sendMail({
+      from: from || EMAIL_USER,
       to,
       subject,
       text,
-      html
-    };
+      html,
+      attachments
+    });
 
-    const res = await t.sendMail(mailOptions);
-    console.log('[notificationTransport] mail sent result', res && (res.messageId || res.accepted));
-    return { ok: true, result: res };
+    console.log('[notificationTransport] Brevo email sent', result && (result.messageId || result.accepted));
+    return { ok: true, result };
   } catch (err) {
-    console.error('[notificationTransport] sendMail error', err && err.message);
+    console.error('[notificationTransport] Brevo sendMail error', err && err.message);
     return { ok: false, error: err && err.message };
   }
 }

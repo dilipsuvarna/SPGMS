@@ -7,7 +7,7 @@ export default defineConfig({
     port: 3001,
     host: '0.0.0.0',
     proxy: {
-      '/api': 'https://spgmsfront.onrender.com'
+      '/api': 'https://spgmsbackend.onrender.com'
     }
   }
 });

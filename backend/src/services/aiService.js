@@ -1,6 +1,6 @@
 const { classifyComplaint, detectPriority } = require('../utils/classifier');
 
-const AI_SERVICE_URL = (process.env.AI_SERVICE_URL || 'https://ai-module-dmh1.onrender.com').replace(/\/+$/, '');
+const AI_SERVICE_URL = (process.env.AI_SERVICE_URL || 'https://spgmsai.onrender.com').replace(/\/+$/, '');
 const AI_REQUEST_TIMEOUT_MS = 10000;
 
 function parseAnalysis(data) {
